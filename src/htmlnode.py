@@ -1,9 +1,13 @@
 class HTMLNode():
-    def __init__(self, value=None, children=None, props=None, tag=None):
+    def __init__(self, tag=None, value=None, children=None, props=None):
         self.tag = tag
         self.value = value
         self.children = children
         self.props = props
+        #tag = string representing the HTML tag name
+        #value = string representing the value of the HTML tag, text inside p
+        #children = list of HTMLNode objects representing the children of the node
+        #props = dictionary of key:value pairs representing attributes of the HTML tag
 
     def to_html(self):
         raise NotImplementedError
@@ -20,40 +24,15 @@ class HTMLNode():
         return f"TAG = {self.tag}, VALUE = {self.value}, CHILDREN = {self.children}, PROPS = {self.props}"
     
 class LeafNode(HTMLNode):
-    def __init__(self, value, props, tag=None):
-        super().__init__()
-        self.value = value
-        self.props = props
-        self.tag = tag
+    def __init__(self, tag, value, props=None):
+        super().__init__(tag, value, None, props)
+        #constructor doesn't allow for children, value and tag now required
 
     def to_html(self):
+        if self.value is None:
+            raise ValueError("Invalid HTML: no value")
         if self.tag is None:
-            raise ValueError
-        if len(self.tag) <= 2:
-            listed = []
-            for t in self.tag:
-                if len(t) == 1:
-                    listed.append(f"<{t}>")
-                else:
-                    listed.append(t)
-            listed.append(f"</{self.tag[0]}>")
-            return "".join(listed)
-        else:
-            url_list = []
-            for i in self.tag: 
-                if type(i) == dict:
-                    s1 = str(i)
-                    s1 = s1.replace(" ","")
-                    #create a dictionary to iterate into a replace function
-                    #not especially space saving right now but I want to keep it for reference
-                    chars_to_replace = {"}":">", "{": f"<{self.tag[0]} ", "'":'"'}
-                    for key, value in chars_to_replace.items():
-                        s1 = s1.replace(key, value)
-                    s1 = s1.replace(":","=",1)
-                    s1 = s1.replace('"',"",2)
-                    url_list.append(s1)
-            url_list.append(self.tag[1])
-            url_list.append(f"</{self.tag[0]}>")
-            return "".join(url_list)
+            return self.value
+        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
         
     
