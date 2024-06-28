@@ -5,18 +5,18 @@ from textnode import TextNode
 #goal is to fail 3/4 tests to make sure each object property is correctly evaluated
 class TestTextNode(unittest.TestCase):
     def test_text_type(self):
-        node = TextNode("This is a text node", "italic")
+        node = TextNode("This is a text node", "bold")
         node2 = TextNode("This is a text node", "bold")
         self.assertEqual(node, node2)
 
     def test_url(self):
-        node = TextNode("sample text", "underline", None)
+        node = TextNode("sample text", "underline", "potato.com")
         node2 = TextNode("sample text", "underline", "potato.com")
         self.assertEqual(node, node2)
 
     def test_text(self):
         node = TextNode("sample text", "italic")
-        node2 = TextNode("sampler text", "italic")
+        node2 = TextNode("sample text", "italic")
         self.assertEqual(node, node2)
 
     def test_same(self):
