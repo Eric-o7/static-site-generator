@@ -2,6 +2,7 @@ import unittest
 
 from htmlnode import HTMLNode
 from htmlnode import LeafNode
+from htmlnode import ParentNode
 
 class TestHTMLNode(unittest.TestCase):
     def test_props_to_html(self):
@@ -24,6 +25,21 @@ class TestHTMLNode(unittest.TestCase):
         node = LeafNode(None, 'Hello, world!')
         self.assertEqual(node.to_html(), 'Hello, world!')
 
+    def test_children_basic(self):
+        node3 = LeafNode("a", "Click me!", {"href": "https://www.github.com"})
+        node2 = LeafNode("b", "SO BOLD")
+        node1 = ParentNode("p",
+                        [node2,
+                         node3,
+                        ]
+                        )
+        self.assertEqual(node1.to_html(), '<p><b>SO BOLD</b><a href="https://www.github.com">Click me!</a></p>')
+
+    def test_to_html_with_grandchildren(self):
+        grandchild_node = LeafNode("i", "spoiled grandchildren :)")
+        child_node = ParentNode("p", [grandchild_node])
+        parent_node = ParentNode("div",[child_node])
+        self.assertEqual(parent_node.to_html(), "<div><p><i>spoiled grandchildren :)</i></p></div>")
 
 if __name__ == "__main__":
     unittest.main()

@@ -11,6 +11,7 @@ class HTMLNode():
 
     def to_html(self):
         raise NotImplementedError
+        #utilize polymorphism to call the correct to_html method on the appropriate node
     
     def props_to_html(self):
         if self.props is None:
@@ -30,9 +31,38 @@ class LeafNode(HTMLNode):
 
     def to_html(self):
         if self.value is None:
-            raise ValueError("Invalid HTML: no value")
+            raise ValueError(f"Invalid HTML: no value")
         if self.tag is None:
             return self.value
         return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+    
+    def __eq__(self, other):
+        if not isinstance(other, LeafNode):
+            return False
+        return(
+            self.tag == other.tag and
+            self.value == other.value and
+            self.props == other.props
+        )
+    
+class ParentNode(HTMLNode):
+    def __init__(self, tag, children, props=None):
+        super().__init__(tag, None, children, props)
+        #constructor doesn't take a value arg, and children arg not optional
+
+    def to_html(self):
+        if self.tag is None:
+            raise ValueError(f"Invalid HTML: Tag is needed")
+        if self.children is None:
+            raise ValueError(f"Invalid HTML: Childless")
+        listed = [f"<{self.tag}>"]
+        for child in self.children:
+            listed.append(child.to_html())
+            #child.to_html() will call the appropriate Class to_html() method
+            #this is considered recursion - LeafNode.to_html() is the base case
+            #polymorphism in action
+        listed.append(f"</{self.tag}>")
+        return "".join(listed)
+
         
     
