@@ -29,6 +29,31 @@ class TextNode():
 
 
 
+def split_nodes_delimiter(old_nodes, delimiter, type):
+    delimited_nodes = [] #create empty list for delimited nodes to append to
+    for node in old_nodes:
+        if not isinstance(node, TextNode):
+            delimited_nodes.append(node)
+            continue
+        text = node.text #create new variable for easier parsing
+        delim1_pos = text.find(delimiter) #find first delimiter for slicing
+        if delim1_pos == -1:
+            delimited_nodes.append(node)
+            continue #no delimiter found - add node as is
+        delim2_pos = text.find(delimiter, delim1_pos + len(delimiter)) #second delim position for slicing
+        if delim2_pos == -1:
+            raise Exception(f"Invalid markdown syntax, must include matching delimiter")
+        #append nodes before, between, and after delim
+        if delim1_pos > 0: #if there is text before first delimiter
+            delimited_nodes.append(TextNode(Text_Type.no_value, text[:delim1_pos]))
+        delimited_nodes.append(TextNode(type, text[delim1_pos + len(delimiter):delim2_pos]))
+        if delim2_pos + len(delimiter) < len(text):
+            delimited_nodes.append(TextNode(Text_Type.no_value, text[delim2_pos+len(delimiter):]))
+
+    return delimited_nodes
+
+    
+
 def text_node_to_leafhtml_node(text_node):
     match text_node.type:
         case Text_Type.no_value:
