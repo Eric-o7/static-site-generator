@@ -1,6 +1,5 @@
 from enum import Enum
 from htmlnode import LeafNode, ParentNode, HTMLNode
-from convert_fun import split_nodes_delimiter, text_node_to_leafhtml_node
 
 class Text_Type(Enum):
     no_value = 1
@@ -26,4 +25,4 @@ class TextNode():
         )
     
     def __repr__(self):
-        return f"TextNode(TEXT = {self.text}, TEXT_TYPE = {self.type}, URL = {self.url}), ALT = {self.alt}"
+        return f"TextNode(TEXT = {self.text}, TEXT_TYPE = {self.type}, URL = {self.url}, ALT = {self.alt})"

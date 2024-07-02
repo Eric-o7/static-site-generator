@@ -1,6 +1,6 @@
 from textnode import Text_Type, TextNode
 from htmlnode import HTMLNode,ParentNode,LeafNode
-
+import re
 
 def split_nodes_delimiter(old_nodes, delimiter, type):
     delimited_nodes = [] #create empty list for delimited nodes to append to
@@ -25,7 +25,6 @@ def split_nodes_delimiter(old_nodes, delimiter, type):
 
     return delimited_nodes
 
-    
 
 def text_node_to_leafhtml_node(text_node):
     match text_node.type:
@@ -47,3 +46,91 @@ def text_node_to_leafhtml_node(text_node):
             return LeafNode("img", "", props={"src": text_node.url, "alt": text_node.alt})
         case _:
             raise Exception(f"Invalid type")
+        
+
+def extract_md_img(text):
+    matches = re.findall(r"!\[(.*?)\]\((.*?)\)", text)
+    return matches
+
+def extract_md_links(text):
+    matches = re.findall(r"\[(.*?)\]\((.*?)\)", text)
+    return matches
+
+def split_nodes_img(presplit_nodes):
+    split_nodes = []
+    def image_slicer(text):
+        if len(text) <=3:
+            return
+        before_img = text.find("![")
+        if before_img == -1:
+            if len(text.strip()) > 0:
+                split_nodes.append(TextNode(Text_Type.no_value, text))
+            return
+        if before_img != -1:
+            if len(text[:before_img].strip()) > 0:
+                split_nodes.append(TextNode(Text_Type.no_value, text[:before_img]))
+        post_image_sep = text.find(')')
+        image_tup = extract_md_img(text[before_img : post_image_sep +1])
+        split_nodes.append(TextNode(Text_Type.image, None, image_tup[0][0], image_tup[0][1]))
+        next_img = text.find('![', post_image_sep)
+        if next_img == -1:
+            if len(text[post_image_sep:]) >= 2:
+                split_nodes.append(TextNode(Text_Type.no_value, text[post_image_sep+1:]))
+        if next_img != -1:    
+            if len(text[post_image_sep:next_img]) >=2:
+                split_nodes.append(TextNode(Text_Type.no_value, text[post_image_sep+1:next_img]))
+            return image_slicer(text[next_img:])
+        return
+
+    if isinstance(presplit_nodes, TextNode):
+        presplit_nodes = [presplit_nodes]    
+    for node in presplit_nodes:
+        if len(node.text) <=1:
+            continue 
+        image_slicer(node.text)
+    print(split_nodes)
+
+
+def split_nodes_link(presplit_nodes):
+    split_nodes = []
+    def image_slicer(text):
+        if len(text) <=3:
+            return
+        before_lnk = text.find("[")
+        if before_lnk == -1:
+            if len(text.strip()) > 0:
+                split_nodes.append(TextNode(Text_Type.no_value, text))
+            return
+        if before_lnk != -1:
+            if len(text[:before_lnk].strip()) > 0:
+                split_nodes.append(TextNode(Text_Type.no_value, text[:before_lnk]))
+        post_link_sep = text.find(')')
+        image_tup = extract_md_links(text[before_lnk : post_link_sep +1])
+        split_nodes.append(TextNode(Text_Type.link, image_tup[0][0], None, image_tup[0][1]))
+        next_link = text.find('[', post_link_sep)
+        if next_link == -1:
+            if len(text[post_link_sep:]) >= 2:
+                split_nodes.append(TextNode(Text_Type.no_value, text[post_link_sep+1:]))
+        if next_link != -1:    
+            if len(text[post_link_sep:next_link]) >=2:
+                split_nodes.append(TextNode(Text_Type.no_value, text[post_link_sep+1:next_link]))
+            return image_slicer(text[next_link:])
+        return
+
+    if isinstance(presplit_nodes, TextNode):
+        presplit_nodes = [presplit_nodes]    
+    for node in presplit_nodes:
+        if len(node.text) <=1:
+            continue 
+        image_slicer(node.text)
+    print(split_nodes)
+    
+        #now we have to turn a tuple into a TextNode
+        #we have to add recursion to this somehow to handle X image links I think, maybe a function within the function?
+
+node = [
+    TextNode(Text_Type.no_value, "Text without link"),
+    TextNode(Text_Type.no_value, "Text with a [link](https://example.com/image1.png) inside it")
+]
+split_nodes_link(node)
+   

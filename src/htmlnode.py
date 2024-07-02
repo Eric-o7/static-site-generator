@@ -1,6 +1,3 @@
-from convert_fun import split_nodes_delimiter, text_node_to_leafhtml_node
-from textnode import Text_Type, TextNode
-
 class HTMLNode():
     def __init__(self, tag=None, value=None, children=None, props=None):
         self.tag = tag

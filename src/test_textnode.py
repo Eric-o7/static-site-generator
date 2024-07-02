@@ -1,8 +1,8 @@
 import unittest
 
-from textnode import TextNode, Text_Type, text_node_to_leafhtml_node, split_nodes_delimiter
+from textnode import TextNode, Text_Type
 from htmlnode import LeafNode
-from convert_fun import split_nodes_delimiter, text_node_to_leafhtml_node
+from convert_fun import split_nodes_delimiter, text_node_to_leafhtml_node, extract_md_links, extract_md_img, split_nodes_img
 
 #text node properties: Type, Text=None, Alt=None, URL=None
 
@@ -107,6 +107,17 @@ class TestTextNode(unittest.TestCase):
             split_nodes_delimiter([node], "*", Text_Type.italic)
         # This part checks that the exception contains the expected error message
         self.assertTrue("Invalid markdown syntax, must include matching delimiter" in str(context.exception))
+
+    def test_extract_img(self):
+        text = "This is text with an ![image](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png) and ![another](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/dfsdkjfd.png)"
+        conversion = [('image', 'https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png'), ('another', 'https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/dfsdkjfd.png')]
+        self.assertEqual(extract_md_img(text), conversion)
+
+    def test_extract_links(self):
+        text = "This is text with a [link](https://www.example.com) and [another](https://www.example.com/another)"
+        conversion = [('link', 'https://www.example.com'), ('another', 'https://www.example.com/another')]
+        self.assertEqual(extract_md_links(text), conversion)
+
 
 if __name__ == "__main__":
     unittest.main()
