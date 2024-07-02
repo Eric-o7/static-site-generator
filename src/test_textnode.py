@@ -2,6 +2,7 @@ import unittest
 
 from textnode import TextNode, Text_Type, text_node_to_leafhtml_node, split_nodes_delimiter
 from htmlnode import LeafNode
+from convert_fun import split_nodes_delimiter, text_node_to_leafhtml_node
 
 #text node properties: Type, Text=None, Alt=None, URL=None
 

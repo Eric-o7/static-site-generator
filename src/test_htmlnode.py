@@ -3,6 +3,8 @@ import unittest
 from htmlnode import HTMLNode
 from htmlnode import LeafNode
 from htmlnode import ParentNode
+from convert_fun import split_nodes_delimiter, text_node_to_leafhtml_node
+
 
 class TestHTMLNode(unittest.TestCase):
     def test_props_to_html(self):
