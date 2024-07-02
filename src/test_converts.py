@@ -158,5 +158,41 @@ class TestImgAndLinkSplit(unittest.TestCase):
         ]
         self.assertEqual(result, expected)
 
+    def test_single_textnode_with_one_link(self):
+        node = TextNode(
+            Text_Type.no_value,
+            "This is text with a [link](https://example.com)"
+        )
+        result = split_nodes_link([node])
+        expected = [
+            TextNode(Text_Type.no_value, "This is text with a "),
+            TextNode(Text_Type.link, "link", None, "https://example.com")
+        ]
+        self.assertEqual(result, expected)
+
+    def test_single_textnode_with_only_link(self):
+        node = TextNode(
+            Text_Type.no_value,
+            "[link](https://example.com)"
+        )
+        result = split_nodes_link([node])
+        expected = [
+            TextNode(Text_Type.link, "link", None, "https://example.com")
+        ]
+        self.assertEqual(result, expected)
+
+    def test_single_textnode_with_only_links(self):
+        node = TextNode(
+            Text_Type.no_value,
+            "[link](https://example.com)[link2](www.link2.com)"
+        )
+        result = split_nodes_link([node])
+        expected = [
+            TextNode(Text_Type.link, "link", None, "https://example.com"),
+            TextNode(Text_Type.link, "link2", None, "www.link2.com")
+        ]
+        self.assertEqual(result, expected)
+    
+
 if __name__ == "__main__":
     unittest.main()

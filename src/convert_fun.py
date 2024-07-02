@@ -92,7 +92,7 @@ def split_nodes_img(presplit_nodes):
 
 def split_nodes_link(presplit_nodes):
     split_nodes = []
-    def image_slicer(text):
+    def link_slicer(text):
         if len(text) <=3:
             return
         before_lnk = text.find("[")
@@ -104,8 +104,8 @@ def split_nodes_link(presplit_nodes):
             if len(text[:before_lnk].strip()) > 0:
                 split_nodes.append(TextNode(Text_Type.no_value, text[:before_lnk]))
         post_link_sep = text.find(')')
-        image_tup = extract_md_links(text[before_lnk : post_link_sep +1])
-        split_nodes.append(TextNode(Text_Type.link, image_tup[0][0], None, image_tup[0][1]))
+        link_tup = extract_md_links(text[before_lnk : post_link_sep +1])
+        split_nodes.append(TextNode(Text_Type.link, link_tup[0][0], None, link_tup[0][1]))
         next_link = text.find('[', post_link_sep)
         if next_link == -1:
             if len(text[post_link_sep:]) >= 2:
@@ -113,7 +113,7 @@ def split_nodes_link(presplit_nodes):
         if next_link != -1:    
             if len(text[post_link_sep:next_link]) >=2:
                 split_nodes.append(TextNode(Text_Type.no_value, text[post_link_sep+1:next_link]))
-            return image_slicer(text[next_link:])
+            return link_slicer(text[next_link:])
         return
 
     if isinstance(presplit_nodes, TextNode):
@@ -121,7 +121,7 @@ def split_nodes_link(presplit_nodes):
     for node in presplit_nodes:
         if len(node.text) <=1:
             continue 
-        image_slicer(node.text)
+        link_slicer(node.text)
     return split_nodes
     
 node = [
