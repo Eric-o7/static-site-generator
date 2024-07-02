@@ -81,14 +81,13 @@ def split_nodes_img(presplit_nodes):
                 split_nodes.append(TextNode(Text_Type.no_value, text[post_image_sep+1:next_img]))
             return image_slicer(text[next_img:])
         return
-
     if isinstance(presplit_nodes, TextNode):
         presplit_nodes = [presplit_nodes]    
     for node in presplit_nodes:
         if len(node.text) <=1:
             continue 
         image_slicer(node.text)
-    print(split_nodes)
+    return split_nodes
 
 
 def split_nodes_link(presplit_nodes):
@@ -123,14 +122,11 @@ def split_nodes_link(presplit_nodes):
         if len(node.text) <=1:
             continue 
         image_slicer(node.text)
-    print(split_nodes)
+    return split_nodes
     
-        #now we have to turn a tuple into a TextNode
-        #we have to add recursion to this somehow to handle X image links I think, maybe a function within the function?
-
 node = [
     TextNode(Text_Type.no_value, "Text without link"),
-    TextNode(Text_Type.no_value, "Text with a [link](https://example.com/image1.png) inside it")
+    TextNode(Text_Type.no_value, "Text with a [link](https://example.com/image1.png) inside it [and another](link.com) plus one more [linky](poop.org) inside the text")
 ]
 split_nodes_link(node)
    
