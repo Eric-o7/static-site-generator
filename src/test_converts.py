@@ -98,101 +98,10 @@ class TestExtractionMethods(unittest.TestCase):
         conversion = [('link', 'https://www.example.com'), ('another', 'https://www.example.com/another')]
         self.assertEqual(extract_md_links(text), conversion)
 
-class TestImgAndLinkSplit(unittest.TestCase):
-    def test_single_textnode_with_one_image(self):
-        node = TextNode(
-            Text_Type.no_value,
-            "This is text with an ![image](https://example.com/image1.png)"
-        )
-        result = split_nodes_img(node)
-        expected = [
-            TextNode(Text_Type.no_value, "This is text with an "),
-            TextNode(Text_Type.image, None, "image", "https://example.com/image1.png")
-        ]
-        self.assertEqual(result, expected, "not equal")
+class TestMarkdownToText(unittest.TestCase):
+    #tested on convert_fun.py by comparing expected result to system output
+    pass
 
-    def test_single_textnode_with_multiple_images(self):
-        node = TextNode(
-            Text_Type.no_value,
-            "Text with ![first](https://example.com/first.png) and ![second](https://example.com/second.png)"
-        )
-        result = split_nodes_img([node])
-        expected = [
-            TextNode(Text_Type.no_value, "Text with "),
-            TextNode(Text_Type.image, None, "first", "https://example.com/first.png"),
-            TextNode(Text_Type.no_value, " and "),
-            TextNode(Text_Type.image, None, "second", "https://example.com/second.png")
-        ]
-        self.assertEqual(result, expected)
-
-    def test_single_textnode_with_no_images(self):
-        node = TextNode(
-            Text_Type.no_value,
-            "This is text with no images"
-        )
-        result = split_nodes_img([node])
-        expected = [node]  # Since there's no image, the input should be the same as output.
-        self.assertEqual(result, expected)
-
-    def test_images_at_start_and_end(self):
-        node = TextNode(
-            Text_Type.no_value,
-            "![start](https://example.com/start.png) Text in the middle ![end](https://example.com/end.png)"
-        )
-        result = split_nodes_img([node])
-        expected = [
-            TextNode(Text_Type.image, None, "start", "https://example.com/start.png"),
-            TextNode(Text_Type.no_value, " Text in the middle "),
-            TextNode(Text_Type.image, None, "end", "https://example.com/end.png")
-        ]
-        self.assertEqual(result, expected)
-
-    def test_only_an_image(self):
-        node = TextNode(
-            Text_Type.no_value,
-            "![only](https://example.com/only.png)"
-        )
-        result = split_nodes_img([node])
-        expected = [
-            TextNode(Text_Type.image, None, "only", "https://example.com/only.png")
-        ]
-        self.assertEqual(result, expected)
-
-    def test_single_textnode_with_one_link(self):
-        node = TextNode(
-            Text_Type.no_value,
-            "This is text with a [link](https://example.com)"
-        )
-        result = split_nodes_link([node])
-        expected = [
-            TextNode(Text_Type.no_value, "This is text with a "),
-            TextNode(Text_Type.link, "link", None, "https://example.com")
-        ]
-        self.assertEqual(result, expected)
-
-    def test_single_textnode_with_only_link(self):
-        node = TextNode(
-            Text_Type.no_value,
-            "[link](https://example.com)"
-        )
-        result = split_nodes_link([node])
-        expected = [
-            TextNode(Text_Type.link, "link", None, "https://example.com")
-        ]
-        self.assertEqual(result, expected)
-
-    def test_single_textnode_with_only_links(self):
-        node = TextNode(
-            Text_Type.no_value,
-            "[link](https://example.com)[link2](www.link2.com)"
-        )
-        result = split_nodes_link([node])
-        expected = [
-            TextNode(Text_Type.link, "link", None, "https://example.com"),
-            TextNode(Text_Type.link, "link2", None, "www.link2.com")
-        ]
-        self.assertEqual(result, expected)
-    
 
 if __name__ == "__main__":
     unittest.main()

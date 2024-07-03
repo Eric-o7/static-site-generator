@@ -4,24 +4,19 @@ import re
 
 def split_nodes_delimiter(old_nodes, delimiter, type):
     delimited_nodes = [] #create empty list for delimited nodes to append to
-    for node in old_nodes:
-        if not isinstance(node, TextNode):
-            delimited_nodes.append(node)
-            continue
-        text = node.text #create new variable for easier parsing
-        delim1_pos = text.find(delimiter) #find first delimiter for slicing
-        if delim1_pos == -1:
-            delimited_nodes.append(node)
-            continue #no delimiter found - add node as is
-        delim2_pos = text.find(delimiter, delim1_pos + len(delimiter)) #second delim position for slicing
-        if delim2_pos == -1:
-            raise Exception(f"Invalid markdown syntax, must include matching delimiter")
-        #append nodes before, between, and after delim
-        if delim1_pos > 0: #if there is text before first delimiter
-            delimited_nodes.append(TextNode(Text_Type.no_value, text[:delim1_pos]))
-        delimited_nodes.append(TextNode(type, text[delim1_pos + len(delimiter):delim2_pos]))
-        if delim2_pos + len(delimiter) < len(text):
-            delimited_nodes.append(TextNode(Text_Type.no_value, text[delim2_pos+len(delimiter):]))
+    text = old_nodes #create new variable for easier parsing
+    delim1_pos = text.find(delimiter) #find first delimiter for slicing
+    if delim1_pos == -1:
+        delimited_nodes.append(node) #no delimiter found - add node as is
+    delim2_pos = text.find(delimiter, delim1_pos + len(delimiter)) #second delim position for slicing
+    if delim2_pos == -1:
+        raise Exception(f"Invalid markdown syntax, must include matching delimiter")
+    #append nodes before, between, and after delim
+    if delim1_pos > 0: #if there is text before first delimiter
+        delimited_nodes.append(TextNode(Text_Type.no_value, text[:delim1_pos]))
+    delimited_nodes.append(TextNode(type, text[delim1_pos + len(delimiter):delim2_pos]))
+    if delim2_pos + len(delimiter) < len(text):
+        delimited_nodes.append(TextNode(Text_Type.no_value, text[delim2_pos+len(delimiter):]))
 
     return delimited_nodes
 
@@ -81,12 +76,7 @@ def split_nodes_img(presplit_nodes):
                 split_nodes.append(TextNode(Text_Type.no_value, text[post_image_sep+1:next_img]))
             return image_slicer(text[next_img:])
         return
-    if isinstance(presplit_nodes, TextNode):
-        presplit_nodes = [presplit_nodes]    
-    for node in presplit_nodes:
-        if len(node.text) <=1:
-            continue 
-        image_slicer(node.text)
+    image_slicer(presplit_nodes)
     return split_nodes
 
 
@@ -115,18 +105,57 @@ def split_nodes_link(presplit_nodes):
                 split_nodes.append(TextNode(Text_Type.no_value, text[post_link_sep+1:next_link]))
             return link_slicer(text[next_link:])
         return
-
-    if isinstance(presplit_nodes, TextNode):
-        presplit_nodes = [presplit_nodes]    
-    for node in presplit_nodes:
-        if len(node.text) <=1:
-            continue 
-        link_slicer(node.text)
+    link_slicer(presplit_nodes)
     return split_nodes
-    
-node = [
-    TextNode(Text_Type.no_value, "Text without link"),
-    TextNode(Text_Type.no_value, "Text with a [link](https://example.com/image1.png) inside it [and another](link.com) plus one more [linky](poop.org) inside the text")
-]
-split_nodes_link(node)
+
+
+def markdown_to_text_nodes(text):
+    if not isinstance(text, TextNode):
+        text = TextNode(Text_Type.no_value, text) #converts input to text node for recursive evaluation
+    if not text.text:
+        return [] #empty list can help integrate into larger pipeline if needed, or could raise exception if I want to enforce requirements
+    elif text.text.find("![") != -1:
+        nodes = split_nodes_img(text.text) #returns a list of nodes from helper functions
+    elif text.text.find("[") != -1:
+        nodes = split_nodes_link(text.text)
+    elif text.text.find("**") != -1:
+        nodes = split_nodes_delimiter(text.text, "**", Text_Type.bold)
+    elif text.text.find("*") != -1:
+        nodes = split_nodes_delimiter(text.text, "*", Text_Type.italic)
+    elif text.text.find("`") != -1:
+        nodes = split_nodes_delimiter(text.text, "`", Text_Type.code)
+    else:
+        return [text] #base case, returns input as a TextNode to be extended onto split_nodes. Must be a list to be extended.
+    split_nodes = []
+    for node in nodes:
+        if isinstance(node, TextNode) and node.type == Text_Type.no_value:
+            split_nodes.extend(markdown_to_text_nodes(node))
+        else:
+            split_nodes.append(node)
+        
+    return split_nodes
    
+   
+def markdown_to_blocks(markdown):
+    lines =  markdown.splitlines()
+    revised_blocks = []
+    unordered_list = []
+    for block in lines:
+        if len(block) >= 2:
+            revised_blocks.append(block)      
+    for i in range(0,len(revised_blocks)):
+        if revised_blocks[i].startswith("*"):
+            unordered_list.append(i)
+    revised_blocks[unordered_list[0]:unordered_list[-1]+1] = [' '.join(revised_blocks[unordered_list[0]:unordered_list[-1]+1])]
+    return revised_blocks
+
+
+block_markdown = """
+This is **bolded** paragraph
+
+This is another paragraph with *italic* text and `code` here
+This is the same paragraph on a new line
+
+* This is a list
+* with items"""
+print(markdown_to_blocks(block_markdown))
