@@ -29,6 +29,8 @@ class LeafNode(HTMLNode):
         super().__init__(tag, value, None, props)
         #constructor doesn't allow for children, value and tag now required
 
+#LeafNode method that formats a string of text into an HTML Node based on the tag
+#uses HTMLNode props_to_html() method to format props appropriately
     def to_html(self):
         if self.value is None:
             raise ValueError(f"Invalid HTML: no value")
@@ -50,6 +52,9 @@ class ParentNode(HTMLNode):
         super().__init__(tag, None, children, props)
         #constructor doesn't take a value arg, and children arg not optional
 
+
+#recursively formats a Parent node and its children.
+#treats input as a tree structure with unknown width and depth
     def to_html(self):
         if self.tag is None:
             raise ValueError(f"Invalid HTML: Tag is needed")

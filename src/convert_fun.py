@@ -1,13 +1,15 @@
 from textnode import Text_Type, TextNode
 from htmlnode import HTMLNode,ParentNode,LeafNode
+from blocknode import BlockNode, Block_Type, block_type_convert, markdown_to_blocks
 import re
 
+#helper function - splits text nodes into more text nodes based on Markdown syntax
 def split_nodes_delimiter(old_nodes, delimiter, type):
     delimited_nodes = [] #create empty list for delimited nodes to append to
     text = old_nodes #create new variable for easier parsing
     delim1_pos = text.find(delimiter) #find first delimiter for slicing
     if delim1_pos == -1:
-        delimited_nodes.append(node) #no delimiter found - add node as is
+        delimited_nodes.append(text) #no delimiter found - add node as is
     delim2_pos = text.find(delimiter, delim1_pos + len(delimiter)) #second delim position for slicing
     if delim2_pos == -1:
         raise Exception(f"Invalid markdown syntax, must include matching delimiter")
@@ -20,7 +22,7 @@ def split_nodes_delimiter(old_nodes, delimiter, type):
 
     return delimited_nodes
 
-
+#helper function - turns a text node into an HTML leafnode depending on the Text_Type
 def text_node_to_leafhtml_node(text_node):
     match text_node.type:
         case Text_Type.no_value:
@@ -42,15 +44,17 @@ def text_node_to_leafhtml_node(text_node):
         case _:
             raise Exception(f"Invalid type")
         
-
+#helper function - identifies where an image is in an unformatted text node
 def extract_md_img(text):
     matches = re.findall(r"!\[(.*?)\]\((.*?)\)", text)
     return matches
 
+#helper function - identifies where links are in an unformatted text node
 def extract_md_links(text):
     matches = re.findall(r"\[(.*?)\]\((.*?)\)", text)
     return matches
 
+#helper function - splits a text node into more text nodes where an image is found
 def split_nodes_img(presplit_nodes):
     split_nodes = []
     def image_slicer(text):
@@ -79,7 +83,7 @@ def split_nodes_img(presplit_nodes):
     image_slicer(presplit_nodes)
     return split_nodes
 
-
+# helper function - splits a text node into more text nodes where a link is found
 def split_nodes_link(presplit_nodes):
     split_nodes = []
     def link_slicer(text):
@@ -108,7 +112,8 @@ def split_nodes_link(presplit_nodes):
     link_slicer(presplit_nodes)
     return split_nodes
 
-
+#utilizes a lot of helper functions to split an unformatted text node into
+#many individual formatted text nodes based on Markdown syntax
 def markdown_to_text_nodes(text):
     if not isinstance(text, TextNode):
         text = TextNode(Text_Type.no_value, text) #converts input to text node for recursive evaluation
@@ -134,28 +139,52 @@ def markdown_to_text_nodes(text):
             split_nodes.append(node)
         
     return split_nodes
-   
-   
-def markdown_to_blocks(markdown):
-    lines =  markdown.splitlines()
-    revised_blocks = []
-    unordered_list = []
-    for block in lines:
-        if len(block) >= 2:
-            revised_blocks.append(block)      
-    for i in range(0,len(revised_blocks)):
-        if revised_blocks[i].startswith("*"):
-            unordered_list.append(i)
-    revised_blocks[unordered_list[0]:unordered_list[-1]+1] = [' '.join(revised_blocks[unordered_list[0]:unordered_list[-1]+1])]
-    return revised_blocks
 
+#HTMLNode reference sheet:
+#HTMLNode(tag, value, children, props)
+#tag = string representing the HTML tag name
+#value = string representing the value of the HTML tag, text inside p
+#children = list of HTMLNode objects representing the children of the node
+#props = dictionary of key:value pairs representing attributes of the HTML tag
+  
+def markdown_to_html_node(blocknode):
+    split_nodes = []
+    if isinstance(blocknode, BlockNode):
+        blocknode = [blocknode]
+    #first we need to make a <div> HTMLNode (Parent) and each child is a separate block
+    for block in blocknode:
+        if block.type == Block_Type.unordered_list:
+            return split_nodes.append(unordered_list_to_html(block))
+        
+#<ul>
+ # <li>Neil Armstrong</li>
+  #<li>Alan Bean</li>
+  #<li>Peter Conrad</li>
+  #<li>Edgar Mitchell</li>
+  #<li>Alan Shepard</li>
+#</ul>
+#parent HTMLnode <ul> has the <li> children
 
-block_markdown = """
-This is **bolded** paragraph
+def unordered_list_to_html(blocknode):
+    #Parentnode <ul> has the <li> children
+    pass
 
-This is another paragraph with *italic* text and `code` here
-This is the same paragraph on a new line
+def ordered_list_to_html(blocknode):
+    #Parentnode <ol> has the <li> children
+    pass
 
-* This is a list
-* with items"""
-print(markdown_to_blocks(block_markdown))
+def quotes_to_html(blocknode):
+    #quote blocks should be surrounded by <blockquote> tag
+    pass
+
+def code_to_html(blocknode):
+    #code blocks have a <pre> ParentNode and <code> child(ren) node(s)
+    pass
+
+def heading_to_html(blocknode):
+    #determine the number of # each heading has and then use <h1> - <h6>
+    pass
+
+def paragraph_to_html(blocknode):
+    #ez pz just put <p> on it
+    pass
