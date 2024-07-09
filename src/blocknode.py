@@ -2,6 +2,7 @@
 from enum import Enum
 from htmlnode import ParentNode
 import re
+from convert_fun import markdown_to_text_nodes
 
 class Block_Type(Enum):
     paragraph = 1
@@ -66,13 +67,24 @@ def blocknode_to_htmlnode(blocknode):
             split_nodes.append(heading_to_html(block.contents))
         else:
             split_nodes.append(ParentNode("<p>", [block.contents]))
-    return top_level
+    if top_level.children[0].tag == "<h1>":
+        for child in top_level.children:
+            if child.children == ParentNode:
+                continue
+            else:
+                markdown_to_text_nodes(child.children)
+        return top_level
+    else:
+        raise Exception (f"all pages need a header")
+    
+def child_to_text(list):
+    pass
 
 #<ul> and <li> are both parent nodes with content as children for further processing
 def unordered_list_to_html(blocknode):
     node_list = []
     top_level = ParentNode("<ul>", node_list)
-    for li in blocknode.split("*"):
+    for li in blocknode.split("[-*]"):
         if len(li) >= 2:
             node_list.append(ParentNode("<li>", [li]))
     #Parentnode <ul> has the <li> children
@@ -111,7 +123,7 @@ def heading_to_html(blocknode):
         return ParentNode("<p>", [blocknode])
     
 block_markdown = """
-###### heading
+# heading
 
 This is a **bolded** paragraph
 

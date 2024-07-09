@@ -1,6 +1,5 @@
 from textnode import Text_Type, TextNode
 from htmlnode import HTMLNode,ParentNode,LeafNode
-from blocknode import BlockNode, Block_Type
 import re
 
 #helper function - splits text nodes into more text nodes based on Markdown syntax
@@ -115,8 +114,15 @@ def split_nodes_link(presplit_nodes):
 #utilizes a lot of helper functions to split an unformatted text node into
 #many individual formatted text nodes based on Markdown syntax
 def markdown_to_text_nodes(text):
+    if isinstance(text, list):
+        text = text[0]
+        if isinstance(text, ParentNode):
+            print(text)
+            text = ParentNode.children.children[0]
+        print(text)
     if not isinstance(text, TextNode):
         text = TextNode(Text_Type.no_value, text) #converts input to text node for recursive evaluation
+        print(text)
     if not text.text:
         return [] #empty list can help integrate into larger pipeline if needed, or could raise exception if I want to enforce requirements
     elif text.text.find("![") != -1:
