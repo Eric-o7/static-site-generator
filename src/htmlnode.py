@@ -62,6 +62,8 @@ class ParentNode(HTMLNode):
             raise ValueError(f"Invalid HTML: Childless")
         listed = [f"<{self.tag}>"]
         for child in self.children:
+            if isinstance(child, str):
+                child = LeafNode(None, child)
             listed.append(child.to_html())
             #child.to_html() will call the appropriate Class to_html() method
             #this is considered recursion - LeafNode.to_html() is the base case

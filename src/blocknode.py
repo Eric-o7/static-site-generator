@@ -3,7 +3,7 @@ from enum import Enum
 from htmlnode import ParentNode
 import re
 from convert_fun import markdown_to_text_nodes, text_node_to_leafhtml_node
-import inspect
+from textnode import Text_Type, TextNode
 
 class Block_Type(Enum):
     paragraph = 1
@@ -67,19 +67,17 @@ def blocknode_to_htmlnode(blocknode):
         elif block.type == Block_Type.heading:
             split_nodes.append(heading_to_html(block.contents))
         else:
-            split_nodes.append(ParentNode("<p>", [block.contents]))
+            split_nodes.append(ParentNode("p", [block.contents]))
     if top_level.children[0].tag == "h1":
         for child in top_level.children:
-            # print(child.tag)
             if child.tag == "pre":
-                child.children[0] = ParentNode("code", child_to_leaf(markdown_to_text_nodes(child.children[0])))
+                print(child.children[0])
+                child.children[0] = ParentNode("code", child_to_leaf((markdown_to_text_nodes(child.children[0]))))
             elif child.tag == "ol" or child.tag == "ul":
                 child.children[0] = ParentNode("li", child_to_leaf(markdown_to_text_nodes(child.children[0])))
-                # print(child.children[0])
-                # print(type(child.children[0]))
             else:
                 child.children = child_to_leaf(markdown_to_text_nodes(child.children))
-        return top_level
+        return top_level.to_html()
     else:
         raise Exception (f"all pages need a header")
     
@@ -97,8 +95,6 @@ def unordered_list_to_html(blocknode):
         if len(li) >= 2:
             node_list.append(ParentNode("li", [li]))
     #Parentnode <ul> has the <li> children
-    print(type(top_level))
-    print(f" MY TOP {top_level}")
     return top_level
 
 #<ol> and <li> are both parent nodes with content as children for further processing
@@ -140,6 +136,18 @@ block_markdown = """
 
 1. This is a numbered
 2. List
+
+This is some **bolded** and *italic* text with `code as well`
+
+"This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)
+
+This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)
+
+```
+def code_to_html()
+    top_level = ParentNode(what_about, )
+    return top_level
+```
 
 * This is a list
 * with items"""
