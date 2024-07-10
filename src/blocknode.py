@@ -2,7 +2,8 @@
 from enum import Enum
 from htmlnode import ParentNode
 import re
-from convert_fun import markdown_to_text_nodes
+from convert_fun import markdown_to_text_nodes, text_node_to_leafhtml_node
+import inspect
 
 class Block_Type(Enum):
     paragraph = 1
@@ -53,7 +54,7 @@ def blocknode_to_htmlnode(blocknode):
     if isinstance(blocknode, BlockNode):
         blocknode = [blocknode]
     #first we need to make a <div> HTMLNode (Parent) and each child is a separate block
-    top_level = ParentNode("<div>", split_nodes)
+    top_level = ParentNode("div", split_nodes)
     for block in blocknode:
         if block.type == Block_Type.unordered_list:
             split_nodes.append(unordered_list_to_html(block.contents))
@@ -67,46 +68,57 @@ def blocknode_to_htmlnode(blocknode):
             split_nodes.append(heading_to_html(block.contents))
         else:
             split_nodes.append(ParentNode("<p>", [block.contents]))
-    if top_level.children[0].tag == "<h1>":
+    if top_level.children[0].tag == "h1":
         for child in top_level.children:
-            if child.children == ParentNode:
-                continue
+            # print(child.tag)
+            if child.tag == "pre":
+                child.children[0] = ParentNode("code", child_to_leaf(markdown_to_text_nodes(child.children[0])))
+            elif child.tag == "ol" or child.tag == "ul":
+                child.children[0] = ParentNode("li", child_to_leaf(markdown_to_text_nodes(child.children[0])))
+                # print(child.children[0])
+                # print(type(child.children[0]))
             else:
-                markdown_to_text_nodes(child.children)
+                child.children = child_to_leaf(markdown_to_text_nodes(child.children))
         return top_level
     else:
         raise Exception (f"all pages need a header")
     
-def child_to_text(list):
-    pass
+def child_to_leaf(list):
+    leaves = []
+    for child in list:
+        leaves.append(text_node_to_leafhtml_node(child))
+    return leaves
 
 #<ul> and <li> are both parent nodes with content as children for further processing
 def unordered_list_to_html(blocknode):
     node_list = []
-    top_level = ParentNode("<ul>", node_list)
-    for li in blocknode.split("[-*]"):
+    top_level = ParentNode("ul", node_list)
+    for li in re.split("[-*]", blocknode):
         if len(li) >= 2:
-            node_list.append(ParentNode("<li>", [li]))
+            node_list.append(ParentNode("li", [li]))
     #Parentnode <ul> has the <li> children
+    print(type(top_level))
+    print(f" MY TOP {top_level}")
     return top_level
 
 #<ol> and <li> are both parent nodes with content as children for further processing
 def ordered_list_to_html(blocknode):
     node_list = []
-    top_level = ParentNode("<ol>", node_list)
+    top_level = ParentNode("ol", node_list)
     for li in re.split("(\d+\.)",blocknode):
         if len(li) > 2:
-            node_list.append(ParentNode("<li>", [li]))
+            node_list.append(ParentNode("li", [li]))
     #Parentnode <ol> has the <li> children
+    # print(top_level)
     return top_level
 
 #content needs to be surrounded by <blockquote>
 def quotes_to_html(blocknode):
-    top_level = ParentNode("<blockquote>", [blocknode.strip(">")])
+    top_level = ParentNode("blockquote", [blocknode.strip(">")])
     return top_level
 
 def code_to_html(blocknode):
-    top_level = ParentNode("<pre>", (ParentNode("<code>", [blocknode.strip("`")])))
+    top_level = ParentNode("pre", [(ParentNode("code", [blocknode.strip("`")]))])
     return top_level
 
 #determine the number of # each heading has and then use <h1> - <h6>
@@ -117,25 +129,14 @@ def heading_to_html(blocknode):
         if s == "#":
             x+=1
     if x <= 6:
-        top_level = ParentNode(f"<h{x}>", [blocknode.strip("#")])
+        top_level = ParentNode(f"h{x}", [blocknode.strip("#")])
+        # print(top_level)
         return top_level
     else:
-        return ParentNode("<p>", [blocknode])
+        return ParentNode("p", [blocknode])
     
 block_markdown = """
 # heading
-
-This is a **bolded** paragraph
-
-This is another paragraph with *italic* text and `inline code` here
-This is the same paragraph on a new line
-
--testing
--another list
-
-```This is a block of code```
-
-> This is a quote!
 
 1. This is a numbered
 2. List

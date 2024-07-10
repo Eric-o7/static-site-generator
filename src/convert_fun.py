@@ -18,7 +18,7 @@ def split_nodes_delimiter(old_nodes, delimiter, type):
     delimited_nodes.append(TextNode(type, text[delim1_pos + len(delimiter):delim2_pos]))
     if delim2_pos + len(delimiter) < len(text):
         delimited_nodes.append(TextNode(Text_Type.no_value, text[delim2_pos+len(delimiter):]))
-
+    # print(f" MY DELIM NODES{delimited_nodes}")
     return delimited_nodes
 
 #helper function - turns a text node into an HTML leafnode depending on the Text_Type
@@ -115,14 +115,13 @@ def split_nodes_link(presplit_nodes):
 #many individual formatted text nodes based on Markdown syntax
 def markdown_to_text_nodes(text):
     if isinstance(text, list):
-        text = text[0]
-        if isinstance(text, ParentNode):
-            print(text)
-            text = ParentNode.children.children[0]
-        print(text)
+        text = TextNode(Text_Type.no_value, text[0])
+    if isinstance(text, ParentNode):
+        text = TextNode(Text_Type.no_value, text.children[0])
     if not isinstance(text, TextNode):
         text = TextNode(Text_Type.no_value, text) #converts input to text node for recursive evaluation
-        print(text)
+    if isinstance(text.text, ParentNode):
+        text = TextNode(Text_Type.no_value, text.text.children[0])
     if not text.text:
         return [] #empty list can help integrate into larger pipeline if needed, or could raise exception if I want to enforce requirements
     elif text.text.find("![") != -1:
@@ -143,5 +142,18 @@ def markdown_to_text_nodes(text):
             split_nodes.extend(markdown_to_text_nodes(node))
         else:
             split_nodes.append(node)
-        
+    # print(f" MY SPLIT NODES {split_nodes}")    
+    # for node in split_nodes:
+    #     print(f" MY SPLIT NODES {split_nodes}")  
+    #     leaves = []
+    #     leaves.append(text_node_to_leafhtml_node(node))
+    #     print(leaves)
+    # return leaves
     return split_nodes
+    
+def split_nodes_to_leaf_list(list):
+    leaves = []
+    for node in list:
+        leaves.append(text_node_to_leafhtml_node(node))
+    # print(f"MY LEAVES{leaves}")
+    return leaves
