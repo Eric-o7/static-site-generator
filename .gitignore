@@ -1,3 +1,5 @@
 __pycache__/
 public/
 workshop.py
+launch.json
+settings.json

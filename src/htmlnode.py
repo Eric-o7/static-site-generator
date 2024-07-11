@@ -60,7 +60,10 @@ class ParentNode(HTMLNode):
             raise ValueError(f"Invalid HTML: Tag is needed")
         if self.children is None:
             raise ValueError(f"Invalid HTML: Childless")
-        listed = [f"<{self.tag}>"]
+        if self.tag in ["ul", "ol"]:
+            listed = [f"<{self.tag}>\n"]
+        else:
+            listed = [f"<{self.tag}>"]
         for child in self.children:
             if isinstance(child, str):
                 child = LeafNode(None, child)
@@ -68,7 +71,12 @@ class ParentNode(HTMLNode):
             #child.to_html() will call the appropriate Class to_html() method
             #this is considered recursion - LeafNode.to_html() is the base case
             #polymorphism in action
-        listed.append(f"</{self.tag}>")
+        if self.tag in ["ul", "ol"]:
+            listed.append(f"\n</{self.tag}>")
+        elif self.tag == "li":
+            listed.append(f"</{self.tag}>\n")
+        else:
+            listed.append(f"</{self.tag}>")
         return "".join(listed)
 
         
