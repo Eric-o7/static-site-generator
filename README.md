@@ -9,7 +9,7 @@ are then parsed into LeafNodes as a list that belongs to a ParentNode.
 Each node has a way to track the content type, or HTML tag, so that it can be properly written in HTML.
 
 This project is the first major project I've completed and the learnings from it are endless.
-I became much more familiar with OOP: class structure, class manipulation, recursion through polymorphism, and enumeration with match/case functionality.
-I learned much more "Functional Programming" to implement recursion in image and link conversions, page generation.
+Among them, I became much more familiar with OOP: class structure, class manipulation, recursion through polymorphism, and enumeration with match/case functionality.
+I practice more recursion in image and link conversions and page generation.
 
-AI helped me solve some of the problems but 85%+ of the code is written by me, and is fully debugged by me using print statements, and step-by-step debugging.
+AI helped work through some tough problems, but all code is written and debugged by me. 
