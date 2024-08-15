@@ -5,13 +5,9 @@ from pathlib import Path
 
 def main():
     reset_public()
-    static = "/home/suprlazr/workspace/github.com/SSG/static"
-    public = "/home/suprlazr/workspace/github.com/SSG/public"
     # copy_static_to_public(static, public)
-    from_md_in_static = "/home/suprlazr/workspace/github.com/SSG/static/content/index.md"
     template_path = "/home/suprlazr/workspace/github.com/SSG/template.html"
-    dest_html_path = "/home/suprlazr/workspace/github.com/SSG/public/index.html"
-    dir_path_content = "/home/suprlazr/workspace/github.com/SSG/static/content"
+    dir_path_content = "/home/suprlazr/workspace/github.com/SSG/static"
     dest_dir_path = "/home/suprlazr/workspace/github.com/SSG/public"
     generate_pages_recursive(dir_path_content, template_path, dest_dir_path)
     

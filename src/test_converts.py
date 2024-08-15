@@ -2,7 +2,7 @@ import unittest
 
 from textnode import TextNode, Text_Type
 from htmlnode import LeafNode
-from convert_fun import split_nodes_delimiter, split_nodes_link, text_node_to_leafhtml_node, extract_md_links, extract_md_img, split_nodes_img
+from convert_fun import split_nodes_delimiter, text_node_to_leafhtml_node, extract_md_links, extract_md_img
 
 class TestTexttoLeaf(unittest.TestCase):
     def test_no_value(self):
